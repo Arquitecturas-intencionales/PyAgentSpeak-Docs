@@ -64,6 +64,18 @@ actions = agentspeak.Actions()
 
 @actions.add(".broadcast", 2)
 def _broadcast(agent, term, intention):
+    """
+ _broadcast
+ Multidifusión de mensajes entre agentes
+-----
+*Parámetros:
+agent Agente receptor
+term  Término de la ilocusión a ser transmitida: tell, untell, achieve
+intention La pila de intenciones del agente emisor
+ 
+*Regresa: Nada
+-----
+    """
     # Illocutionary force.
     ilf = agentspeak.grounded(term.args[0], intention.scope)
     if not agentspeak.is_atom(ilf):
@@ -97,6 +109,18 @@ def _broadcast(agent, term, intention):
 
 @actions.add(".send", 3)
 def _send(agent, term, intention):
+    """
+ _send
+ Envía un mensaje a un agente o grupo de agentes
+-----
+*Parámetros:
+agent El agente emisor
+term  El mensaje, con fuerza ilocutoria: tell, untell, achieve
+intention La pila de intenciones del agente emisor
+ 
+*Regresa: Nada
+-----
+    """
     # Find the receivers: By a string, atom or list of strings or atoms.
     receivers = agentspeak.grounded(term.args[0], intention.scope)
     if not agentspeak.is_list(receivers):
@@ -149,6 +173,20 @@ COLORS = [(colorama.Back.GREEN, colorama.Fore.WHITE),
 @actions.add(".print")
 @agentspeak.optimizer.no_scope_effects
 def _print(agent, term, intention, _color_map={}, _current_color=[0]):
+    """
+    _print
+ Imprime un término. Función auxiliar disponible para los agentes
+-----
+*Parámetros:
+agent Agente que manda imprimir
+term  Término a imprimir
+intention La pila de intenciones del agente emisor
+_color_map={} Mapa de colores para identificar a un agente
+ _current_color=[0] Color asociado al agente
+ 
+*Regresa: Nada
+-----
+    """
     if agent in _color_map:
         color = _color_map[agent]
     else:
@@ -168,6 +206,18 @@ def _print(agent, term, intention, _color_map={}, _current_color=[0]):
 @actions.add(".fail", 0)
 @agentspeak.optimizer.no_scope_effects
 def _fail(agent, term, intention):
+    """
+ _fail
+ Falla por defecto. Hace fallar una intención
+-----
+*Parámetros:
+agent Agente dueño de la intención fallida
+term  Término que identifica a la intención
+intention La pila de intenciones del agente emisor
+ 
+*Regresa: 
+-----
+    """
     return
     yield
 
@@ -175,6 +225,18 @@ def _fail(agent, term, intention):
 @actions.add(".my_name", 1)
 @agentspeak.optimizer.function_like
 def _my_name(agent, term, intention):
+    """
+    _my_name
+ Determina si el término recibido unifica con el nombre del agente consultado
+-----
+*Parámetros:
+agent Agente consultado
+term  Término a evaluar
+intention Pila de intenciones
+ 
+*Regresa: Nada
+-----
+    """
     if agentspeak.unify(term.args[0], Literal(agent.name), intention.scope, intention.stack):
         yield
 
@@ -182,6 +244,18 @@ def _my_name(agent, term, intention):
 @actions.add(".concat")
 @agentspeak.optimizer.function_like
 def _concat(agent, term, intention):
+    """
+ _concat
+ Concatena dos términos que unifican en la pila de intenciones
+-----
+*Parámetros:
+agent Agente consultado
+term  Término a evaluar
+intention Pila de intenciones
+ 
+*Regresa: Nada
+-----
+    """
     args = [agentspeak.grounded(arg, intention.scope) for arg in term.args[:-1]]
 
     if all(isinstance(arg, (tuple, list)) for arg in args):
@@ -202,18 +276,51 @@ actions.add_function(".length", (None, ), len)
 
 @actions.add_function(".nth", (int, tuple))
 def _nth(index, l):
+    """
+ _nth
+ Devuelve el n-ésimo elemento de una lista
+-----
+*Parámetros:
+index Índice del elemento a ser devuelto: n
+l  Lista a ser consultada
+ 
+*Regresa: El n-ésimo elemento de la lista
+-----
+    """
     assert index >= 0
     return l[index]
 
 
 @actions.add_function(".sort", (tuple, ))
 def _sort(l):
+    """
+ _sort
+ Ordena una tupla/lista
+-----
+*Parámetros:
+l Tupla/Lista a ser ordenada
+  
+*Regresa: Lista ordenada
+-----
+    """
     return tuple(sorted(l))
 
 
 @actions.add(".substring", 3)
 @agentspeak.optimizer.function_like
 def _substring(agent, term, intention):
+    """
+    _substring
+ Verifica si un término es una subcadena de otro
+-----
+*Parámetros:
+agent Agente activo
+term  Términos a ser comparados
+intention Pila de intenciones del agente
+ 
+*Regresa: Nada
+-----
+    """
     needle = asl_str(agentspeak.grounded(term.args[0], intention.scope))
     haystack = asl_str(agentspeak.grounded(term.args[1], intention.scope))
 
@@ -233,6 +340,18 @@ def _substring(agent, term, intention):
 @actions.add(".member", 2)
 @agentspeak.optimizer.function_like
 def _member(agent, term, intention):
+    """
+    _member
+ Determina si un término es miembro de una lista
+-----
+*Parámetros:
+agent Agente activo
+term  Términos a ser comparados
+intention Pila de intenciones del agente
+
+ *Regresa: Nada
+-----
+    """
     choicepoint = object()
 
     for member in agentspeak.evaluate(term.args[1], intention.scope):
@@ -255,6 +374,18 @@ actions.add_predicate(".structure", (None, ), agentspeak.is_structure)
 @actions.add(".ground", 1)
 @agentspeak.optimizer.no_scope_effects
 def _ground(agent, term, intention):
+    """
+    _ground
+ Determina si un término está instanciado (tiene valor)
+-----
+*Parámetros:
+agent Agente activo
+term  Término a ser evaluado
+intention Pila de intenciones del agente
+ 
+*Regresa: 
+-----
+    """
     if agentspeak.is_ground(term, intention.scope):
         yield
 
@@ -262,6 +393,7 @@ def _ground(agent, term, intention):
 @actions.add(".findall", 3)
 @agentspeak.optimizer.function_like
 def _findall(agent, term, intention):
+    
     pattern = agentspeak.evaluate(term.args[0], intention.scope)
     query = agentspeak.runtime.TermQuery(term.args[1])
     result = []
