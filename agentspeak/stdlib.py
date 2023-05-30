@@ -393,7 +393,18 @@ intention Pila de intenciones del agente
 @actions.add(".findall", 3)
 @agentspeak.optimizer.function_like
 def _findall(agent, term, intention):
-    
+    """
+    _findall
+ Devuelve los términos que unifican con el parámetro recibido en la pila de intenciones
+-----
+*Parámetros:
+agent Agente activo
+term  Término a buscar
+intention Pila de intenciones del agente
+ 
+*Regresa: Nada
+-----
+    """
     pattern = agentspeak.evaluate(term.args[0], intention.scope)
     query = agentspeak.runtime.TermQuery(term.args[1])
     result = []
@@ -409,6 +420,18 @@ def _findall(agent, term, intention):
 @actions.add(".count", 2)
 @agentspeak.optimizer.function_like
 def _count(agent, term, intention):
+    """
+    _count
+ Devluelve el número de términos que unifican con el parámetro dado
+-----
+*Parámetros:
+agent Agente activo
+term  Término a buscar
+intention Pila de intenciones del agente
+   
+*Regresa: Nada
+-----
+    """
     query = agentspeak.runtime.TermQuery(term.args[0])
 
     choicepoint = object()
@@ -425,6 +448,18 @@ def _count(agent, term, intention):
 @actions.add(".abolish", 1)
 # TODO: Inform optimizer.
 def _abolish(agent, term, intention):
+    """
+    _abolish
+ Elimina creencias de la base de la gente
+-----
+*Parámetros:
+agent Agente activo
+term  Término que representa la creencia
+intention Pila de intenciones del agente
+ 
+*Regresa: Nada
+-----
+    """
     memo = {}
     pattern = agentspeak.freeze(term.args[0], intention.scope, memo)
     group = agent.beliefs[pattern.literal_group()]
@@ -442,6 +477,18 @@ def _abolish(agent, term, intention):
     agentspeak.optimizer.InferenceEvilnessConst.EFFECT_DOBIND
 )
 def _date(agent, term, intention):
+"""
+_date
+ Devuelve una fecha
+-----
+*Parámetros:
+agent Agente activo
+term  Término que unificará con la fecha devuelta
+intention Pila de intenciones del agente 
+
+*Regresa: Nada
+-----
+"""
     date = datetime.datetime.now()
 
     if (agentspeak.unify(term.args[0], date.year, intention.scope, intention.stack) and
@@ -457,6 +504,18 @@ def _date(agent, term, intention):
     agentspeak.optimizer.InferenceEvilnessConst.EFFECT_DOBIND
 )
 def _time(agent, term, intention):
+    """
+ _time
+ Devuelve una marca temporal
+-----
+*Parámetros:
+agent Agente activo
+term  Término que unificará con la marca de tiempo
+intention Pila de intenciones del agente
+ 
+*Regresa: Nada
+-----
+    """
     time = datetime.datetime.now()
 
     if (agentspeak.unify(term.args[0], time.hour, intention.scope, intention.stack) and
@@ -470,6 +529,18 @@ def _time(agent, term, intention):
 @actions.add(".wait", 2)
 @agentspeak.optimizer.all_bound
 def _wait(agent, term, intention):
+    """
+ _wait
+ Retrasa el paso de razonamiento en n cantidad de milisegundos
+-----
+*Parámetros:
+agent Agente activo
+term  Término que unifica con el evento a ser retardado
+intention Pila de intenciones del agente
+ 
+*Regresa: Nada
+-----
+    """
     # Handle optional arguments.
     args = [agentspeak.grounded(arg, intention.scope) for arg in term.args]
     if len(args) == 2:
@@ -519,6 +590,7 @@ def _wait(agent, term, intention):
 @actions.add(".range", 2)
 @agentspeak.optimizer.function_like
 def _range_2(agent, term, intention):
+    
     choicepoint = object()
 
     for i in range(int(agentspeak.grounded(term.args[0], intention.scope))):
@@ -543,6 +615,18 @@ def _dump(agent, term, intention):
     agentspeak.optimizer.InferenceEvilnessConst.EFFECT_UNBIND
 )
 def _unbind_all(agent, term, intention):
+    """
+ _unbind_all
+ Libera los términos instanciados del agente
+-----
+*Parámetros:
+agent Agente activo
+term  No usado
+intention Pila de intenciones del agente
+ 
+*Regresa: Nada
+-----
+"""
     intention.scope.clear()
     yield
 
@@ -550,6 +634,18 @@ def _unbind_all(agent, term, intention):
 @actions.add(".control_flow", 0)
 @agentspeak.optimizer.no_scope_effects
 def _control_flow(agent, term, intention):
+    """
+ _control_flow
+ Crea una gráfica con los planes del agente a manera de representación del flujo de control
+-----
+*Parámetros:
+agent Agente activo
+term  No usado
+intention Pila de intenciones del agente
+ 
+*Regresa: Nada
+-----
+    """
     out = open("control_flow.dot", "w")
     print("digraph control_flow {", file=out)
     for plans in agent.plans.values():
